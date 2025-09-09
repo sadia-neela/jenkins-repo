@@ -38,7 +38,7 @@ pipeline {
     post {
         always {
             echo 'Archiving test artifacts...'
-            archiveArtifacts(artifacts: 'allure-results/**/*, wdio.log', fingerprint: true)
+            archiveArtifacts(artifacts: 'allure-results/**/*, url.txt', fingerprint: true)
             allure(
                 includeProperties: false,
                 jdk: '',
