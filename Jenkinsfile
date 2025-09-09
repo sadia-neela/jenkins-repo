@@ -6,8 +6,22 @@ pipeline {
 
     stages {
         stage('Checkout') { steps { checkout scm } }
-        
-        // NEW STAGE: Copy the required artifact from the upstream job
+
+        // NEW STAGE: Ensure the upstream job has run successfully
+        stage('Build Upstream Dependency') {
+            steps {
+                script {
+                    // This builds the 'create-url-file' job and waits for it to finish.
+                    // If it fails, this entire pipeline will fail immediately.
+                    build(
+                        job: 'create-url-file',
+                        wait: true // Wait for the upstream build to finish
+                    )
+                }
+            }
+        }
+
+        // Copy the required artifact from the upstream job
         stage('Copy URL Config') {
             steps {
                 script {
