@@ -1,35 +1,35 @@
 pipeline {
     agent any
-
-    // NEW SECTION: Define parameters here
     parameters {
-        choice(
-            name: 'BROWSER',
-            choices: ['chrome', 'firefox'],
-            description: 'Select the browser to run the tests against'
-        )
+        choice( name: 'BROWSER', choices: ['chrome', 'firefox'], description: 'Select the browser' )
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout') { steps { checkout scm } }
+        
+        // NEW STAGE: Copy the required artifact from the upstream job
+        stage('Copy URL Config') {
             steps {
-                checkout scm
+                script {
+                    // Use the copyArtifacts plugin to get the file
+                    copyArtifacts(
+                        projectName: 'create-url-file',   // Name of the upstream job
+                        selector: lastSuccessful(),       // Copy from the last successful build of that job
+                        filter: 'url.txt',               // Name of the file to copy
+                        // target: '.' is optional, it copies to the root of the workspace by default
+                    )
+                    // Optional: Print the contents to the log to confirm it worked
+                    bat 'type url.txt'
+                }
             }
         }
-        stage('Install Dependencies') {
-            steps {
-                bat 'npm install'
-            }
-        }
+
+        stage('Install Dependencies') { steps { bat 'npm install' } }
+        
         stage('Run Tests') {
             steps {
-                // Read the parameter and pass it as an environment variable
                 script {
-                    // For Windows bat command
                     powershell "\$env:BROWSER='${params.BROWSER}'; npx wdio run ./wdio.conf.js"
-
-                    // If you were on Linux/Mac, you would use:
-                    // sh "BROWSER=${params.BROWSER} npx wdio run ./wdio.conf.js"
                 }
             }
         }
@@ -39,12 +39,7 @@ pipeline {
         always {
             echo 'Archiving test artifacts...'
             archiveArtifacts(artifacts: 'allure-results/**/*, wdio.log', fingerprint: true)
-            allure(
-                includeProperties: false,
-                jdk: '',
-                results: [[path: 'allure-results']],
-                report: 'allure-report'
-            )
+            allure(includeProperties: false, jdk: '', results: [[path: 'allure-results']], report: 'allure-report')
         }
         success {
             echo "Pipeline for ${params.BROWSER} completed successfully! 🎉"
