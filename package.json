@@ -9,5 +9,8 @@
   },
   "scripts": {
     "wdio": "wdio run ./wdio.conf.js"
+  },
+  "dependencies": {
+    "geckodriver": "^6.0.1"
   }
 }
