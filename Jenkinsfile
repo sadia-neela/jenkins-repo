@@ -22,18 +22,22 @@ pipeline {
     // POST-BUILD ACTIONS
     post {
         always {
-            echo 'Archiving test artifacts for future reference...'
-            // Archive the raw Allure results and the log file
-            archiveArtifacts(
-                artifacts: 'allure-results/**/*, wdio.log',
-                fingerprint: true
+            echo 'Archiving test artifacts...'
+            archiveArtifacts(artifacts: 'allure-results/**/*, wdio.log', fingerprint: true)
+
+            // NEW STEP: Generate and publish the Allure report
+            allure(
+                includeProperties: false,
+                jdk: '',
+                results: [[path: 'allure-results']], // Path to the raw results
+                report: 'allure-report' // Directory where the report will be generated
             )
         }
         success {
             echo 'Pipeline completed successfully! 🎉'
         }
         failure {
-            echo 'Pipeline failed. Artifacts have been archived for investigation.'
+            echo 'Pipeline failed. Artifacts and report have been generated for investigation.'
         }
     }
 }
