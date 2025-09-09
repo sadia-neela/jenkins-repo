@@ -1,4 +1,6 @@
 import { browser } from '@wdio/globals'
+import fs from 'fs';
+import pathModule from 'path';
 
 /**
 * main page object containing all methods, selectors and functionality
@@ -10,6 +12,7 @@ export default class Page {
     * @param path path of the sub page (e.g. /path/to/page.html)
     */
     open (path) {
-        return browser.url(`https://the-internet.herokuapp.com/${path}`)
+        const url = fs.readFileSync(pathModule.resolve(process.cwd(), 'url.txt'), 'utf-8').trim();
+        return browser.url(`${url}/${path}`);
     }
 }
