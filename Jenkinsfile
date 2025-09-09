@@ -1,37 +1,39 @@
 pipeline {
-    agent any // Runs on any available Jenkins agent
+    agent any
 
     stages {
         stage('Checkout') {
             steps {
-                // This checks out the code from the SCM (Git) defined in the job
                 checkout scm
             }
         }
-
         stage('Install Dependencies') {
             steps {
-                bat 'npm install' // Uses Windows batch command
+                bat 'npm install' // Use 'sh' for Linux/Mac
             }
         }
-
         stage('Run Tests') {
             steps {
-                bat 'npx wdio run ./wdio.conf.js' // Uses Windows batch command
+                bat 'npx wdio run ./wdio.conf.js' // Use 'sh' for Linux/Mac
             }
         }
     }
 
+    // POST-BUILD ACTIONS
     post {
         always {
-            echo 'Test execution finished. Check the logs above for results.'
-            // You can add advanced post-build actions here later, like sending emails or publishing reports
+            echo 'Archiving test artifacts for future reference...'
+            // Archive the raw Allure results and the log file
+            archiveArtifacts(
+                artifacts: 'allure-results/**/*, wdio.log',
+                fingerprint: true
+            )
         }
         success {
             echo 'Pipeline completed successfully! 🎉'
         }
         failure {
-            echo 'Pipeline failed! See the logs for details.'
+            echo 'Pipeline failed. Artifacts have been archived for investigation.'
         }
     }
 }
