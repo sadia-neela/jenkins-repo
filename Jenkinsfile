@@ -26,7 +26,7 @@ pipeline {
                 // Read the parameter and pass it as an environment variable
                 script {
                     // For Windows bat command
-                    bat "set BROWSER=${params.BROWSER} && npx wdio run ./wdio.conf.js"
+                    powershell "\$env:BROWSER='${params.BROWSER}'; npx wdio run ./wdio.conf.js"
 
                     // If you were on Linux/Mac, you would use:
                     // sh "BROWSER=${params.BROWSER} npx wdio run ./wdio.conf.js"
