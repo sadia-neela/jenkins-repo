@@ -1,6 +1,15 @@
 pipeline {
     agent any
 
+    // NEW SECTION: Define parameters here
+    parameters {
+        choice(
+            name: 'BROWSER',
+            choices: ['chrome', 'firefox'],
+            description: 'Select the browser to run the tests against'
+        )
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -9,35 +18,39 @@ pipeline {
         }
         stage('Install Dependencies') {
             steps {
-                bat 'npm install' // Use 'sh' for Linux/Mac
+                bat 'npm install'
             }
         }
         stage('Run Tests') {
             steps {
-                bat 'npx wdio run ./wdio.conf.js' // Use 'sh' for Linux/Mac
+                // Read the parameter and pass it as an environment variable
+                script {
+                    // For Windows bat command
+                    bat "set BROWSER=${params.BROWSER} && npx wdio run ./wdio.conf.js"
+
+                    // If you were on Linux/Mac, you would use:
+                    // sh "BROWSER=${params.BROWSER} npx wdio run ./wdio.conf.js"
+                }
             }
         }
     }
 
-    // POST-BUILD ACTIONS
     post {
         always {
             echo 'Archiving test artifacts...'
             archiveArtifacts(artifacts: 'allure-results/**/*, wdio.log', fingerprint: true)
-
-            // NEW STEP: Generate and publish the Allure report
             allure(
                 includeProperties: false,
                 jdk: '',
-                results: [[path: 'allure-results']], // Path to the raw results
-                report: 'allure-report' // Directory where the report will be generated
+                results: [[path: 'allure-results']],
+                report: 'allure-report'
             )
         }
         success {
-            echo 'Pipeline completed successfully! 🎉'
+            echo "Pipeline for ${params.BROWSER} completed successfully! 🎉"
         }
         failure {
-            echo 'Pipeline failed. Artifacts and report have been generated for investigation.'
+            echo "Pipeline for ${params.BROWSER} failed. Check the report."
         }
     }
 }
