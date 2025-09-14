@@ -1,56 +1,27 @@
 pipeline {
     agent any
 
-    // NEW SECTION: Define parameters here
-    parameters {
-        choice(
-            name: 'BROWSER',
-            choices: ['chrome', 'firefox'],
-            description: 'Select the browser to run the tests against'
-        )
-    }
-
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        stage('Install Dependencies') {
-            steps {
-                bat 'npm install'
-            }
-        }
-        stage('Run Tests') {
-            steps {
-                // Read the parameter and pass it as an environment variable
-                script {
-                    // For Windows bat command
-                    powershell "\$env:BROWSER='${params.BROWSER}'; npx wdio run ./wdio.conf.js"
-
-                    // If you were on Linux/Mac, you would use:
-                    // sh "BROWSER=${params.BROWSER} npx wdio run ./wdio.conf.js"
-                }
-            }
-        }
     }
 
     post {
         always {
-            echo 'Archiving test artifacts...'
-            archiveArtifacts(artifacts: 'allure-results/**/*, url.txt', fingerprint: true)
-            allure(
-                includeProperties: false,
-                jdk: '',
-                results: [[path: 'allure-results']],
-                report: 'allure-report'
+            echo 'Archiving the URL file from source control...'
+            archiveArtifacts(
+                artifacts: 'url.txt', // Archive the file that was checked out from Git
+                fingerprint: true
             )
         }
         success {
-            echo "Pipeline for ${params.BROWSER} completed successfully! 🎉"
+            echo "URL file archived successfully! 🎉"
         }
         failure {
-            echo "Pipeline for ${params.BROWSER} failed. Check the report."
+            echo "Failed to archive URL file."
         }
     }
 }
