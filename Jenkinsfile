@@ -51,20 +51,11 @@ pipeline {
 
     post {
         always {
+            // Clean up old Allure result files before archiving new ones
+            bat 'del /f /q allure-results\\*.json allure-results\\*.xml 2>nul || echo "No files to delete"'
             echo 'Archiving test artifacts...'
             archiveArtifacts(artifacts: 'allure-results/**/*, wdio.log', fingerprint: true)
-            
-            // KEY FIX: Prevent Allure report generation from affecting build status
-            script {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE', message: 'Allure report generation had issues but build continues.') {
-                    allure(
-                        includeProperties: false,
-                        jdk: '',
-                        results: [[path: 'allure-results']],
-                        report: 'allure-report'
-                    )
-                }
-            }
+            allure(includeProperties: false, jdk: '', results: [[path: 'allure-results']], report: 'allure-report')
         }
         success {
             echo "Pipeline for ${params.BROWSER} completed successfully! 🎉"
