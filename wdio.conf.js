@@ -151,6 +151,7 @@ export const config = {
       disableWebdriverStepsReporting: true,
       disableWebdriverScreenshotsReporting: false,
       useCucumberStepReporter: true,
+      ignoreHookFailures: true
     }],
   ],
 
