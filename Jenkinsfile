@@ -1,3 +1,8 @@
+// Create multistage Jenkins pipeline
+// that includes a stage to build an upstream job
+// and copy an artifact (url.txt) from it before running tests
+// Also includes Allure report generation and cleanup
+
 pipeline {
     agent any
     parameters {
