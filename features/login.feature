@@ -8,4 +8,4 @@ Feature: The Internet Guinea Pig Website
 
     Examples:
       | username | password             | message                        |
-      | tomsmith | SuperSecretPassword! | You logged into a secure area! |
+      | tomsmith | wrongpass            | You logged into a secure area! |
