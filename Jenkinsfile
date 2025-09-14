@@ -53,7 +53,18 @@ pipeline {
         always {
             echo 'Archiving test artifacts...'
             archiveArtifacts(artifacts: 'allure-results/**/*, wdio.log', fingerprint: true)
-            allure(includeProperties: false, jdk: '', results: [[path: 'allure-results']], report: 'allure-report')
+            
+            // KEY FIX: Prevent Allure report generation from affecting build status
+            script {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE', message: 'Allure report generation had issues but build continues.') {
+                    allure(
+                        includeProperties: false,
+                        jdk: '',
+                        results: [[path: 'allure-results']],
+                        report: 'allure-report'
+                    )
+                }
+            }
         }
         success {
             echo "Pipeline for ${params.BROWSER} completed successfully! 🎉"
