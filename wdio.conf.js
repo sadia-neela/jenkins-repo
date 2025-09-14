@@ -1,4 +1,5 @@
 const browserName = process.env.BROWSER || 'chrome';
+import hooks from './hooks.js';
 export const config = {
     //
     // ====================
@@ -173,7 +174,7 @@ export const config = {
         // <boolean> Enable this config to treat undefined definitions as warnings.
         ignoreUndefinedDefinitions: false
     },
-
+    ...hooks,
 
     //
     // =====
