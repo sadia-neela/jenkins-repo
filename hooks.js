@@ -1,9 +1,18 @@
 const hooks = {
-    beforeSession: function () {
-        console.log('*** WDIO Session started ***');
+    before: async function (capabilities, specs) {
+        try {
+            console.log('*** Test execution started ***');
+        } catch (err) {
+            console.error('Error in before hook:', err);
+        }
     },
-    afterSession: function () {
-        console.log('*** WDIO Session finished ***');
+    after: async function (result, capabilities, specs) {
+        try {
+            console.log('*** Test execution finished ***');
+        } catch (err) {
+            console.error('Error in after hook:', err);
+        }
     }
 };
+
 export default hooks;
